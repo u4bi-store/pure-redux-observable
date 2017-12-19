@@ -22,18 +22,35 @@
             console.log('applyMiddleware\n\n', applyMiddleware);
             console.log('createEpicMiddleware\n\n', createEpicMiddleware);
 
+
             /*------- Actions ---------------------------------------------*/
             var GET_BOARDS         = '[Boards] GetBoards';
                 GET_BOARDS_SUCCESS = '[Boards] GetBoardsSuccess';
 
             var GetBoards        = () => ({ type : GET_BOARDS });
-                GetBoardsSuccess = () => ({ type : GET_BOARDS_SUCCESS });
+                GetBoardsSuccess = (boards) => {
+                    console.log('GetBoardsSuccess', boards);
+                    return ({ type : GET_BOARDS_SUCCESS, ...boards })
+                };
 
 
             /*------- Effects ---------------------------------------------*/
             var getBoards$ = (epic) => epic.ofType(GET_BOARDS)
                                             .delay(1000)
-                                            .mapTo(GetBoardsSuccess());
+                                            .switchMap((action) => {
+                                                return Rx.Observable.ajax({
+                                                    url : 'http://127.0.0.1:5500/model/data.json',
+                                                    method : 'GET',
+                                                    crossDomain : true
+                                                }).map(e => {
+                                                    console.log('Ajax then', e.response);
+                                                    return e.response
+                                                }).catch(err => console.error(err));
+                                            })
+                                            .map(v => {
+                                                console.log('Effects then', v);
+                                                return GetBoardsSuccess(v)
+                                            });
 
 
             /*------- Reducer ---------------------------------------------*/
@@ -42,8 +59,8 @@
                     boards : []
                 },
                 newState = (state, newData) => Object.assign({}, state, newData);
-            
-            var boardsReducer = (state = initialStat, action) => {
+
+            var boardsReducer = (state = initialState, action) => {
                 console.log('action', action);
 
                 switch (action.type) {
@@ -54,6 +71,14 @@
                     default : state;
                 }
             };
+
+
+            /*------- App ---------------------------------------------*/
+            var effects = createEpicMiddleware(getBoards$);
+                store   = createStore(boardsReducer, applyMiddleware(effects));
+            
+            store.subscribe( ()=> console.log('Subscribe then\n\n', store.getState(), '\n\n'));
+            store.dispatch(GetBoards());
 
         </script>
     </body>

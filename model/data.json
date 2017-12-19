@@ -1,0 +1,22 @@
+{
+    "boards": [
+        {
+            "writer"  : "writer 1",
+            "title"   : "title 1",
+            "content" : "content 1",
+            "id"      : 1
+        },
+        {
+            "writer"  : "writer 2",
+            "title"   : "title 2",
+            "content" : "content 2",
+            "id"      : 2
+        },
+        {
+            "writer"  : "writer 3",
+            "title"   : "title 3",
+            "content" : "content 3",
+            "id"      : 3
+        }
+    ]
+}
