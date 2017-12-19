@@ -29,6 +29,12 @@
             var GetBoards        = () => ({ type : GET_BOARDS });
                 GetBoardsSuccess = () => ({ type : GET_BOARDS_SUCCESS });
 
+
+            /*------- Effects ---------------------------------------------*/
+            var getBoards$ = (epic) => epic.ofType(GET_BOARDS)
+                                            .delay(1000)
+                                            .mapTo(GetBoardsSuccess());
+            
         </script>
     </body>
 </html>
