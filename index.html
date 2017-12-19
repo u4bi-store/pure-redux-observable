@@ -22,6 +22,12 @@
             console.log('applyMiddleware\n\n', applyMiddleware);
             console.log('createEpicMiddleware\n\n', createEpicMiddleware);
 
+            /*------- Actions ---------------------------------------------*/
+            var GET_BOARDS         = '[Boards] GetBoards';
+                GET_BOARDS_SUCCESS = '[Boards] GetBoardsSuccess';
+
+            var GetBoards        = () => ({ type : GET_BOARDS });
+                GetBoardsSuccess = () => ({ type : GET_BOARDS_SUCCESS });
 
         </script>
     </body>
