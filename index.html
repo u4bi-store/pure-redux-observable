@@ -13,6 +13,15 @@
         <script>
             console.log('Redux', Redux);
             console.log('ReduxObservable', ReduxObservable);
+            
+            var createStore          = Redux.createStore,
+                applyMiddleware      = Redux.applyMiddleware,
+                createEpicMiddleware = ReduxObservable.createEpicMiddleware;
+            
+            console.log('createStore\n\n',createStore);
+            console.log('applyMiddleware\n\n', applyMiddleware);
+            console.log('createEpicMiddleware\n\n', createEpicMiddleware);
+
 
         </script>
     </body>
