@@ -1,7 +1,7 @@
 ![Demo](model/demo.gif)
 
 # Demo
-> https://u4bi.github.io/pure-redux-observable
+> https://u4bi-store.github.io/pure-redux-observable
 
 # USE
 
@@ -18,10 +18,10 @@ var createStore          = Redux.createStore,
 ### Actions
 
 ```javascript
-var GET_BOARDS         = '[Boards] GetBoards';
+var GET_BOARDS         = '[Boards] GetBoards',
     GET_BOARDS_SUCCESS = '[Boards] GetBoardsSuccess';
 
-var GetBoards        = () => ({ type : GET_BOARDS });
+var GetBoards        = () => ({ type : GET_BOARDS }),
     GetBoardsSuccess = (boards) => {
         console.log('GetBoardsSuccess', boards);
         return ({ type : GET_BOARDS_SUCCESS, ...boards })
@@ -75,7 +75,7 @@ var boardsReducer = (state = initialState, action) => {
 
 ### App
 ```javascript
-var effects = createEpicMiddleware(getBoards$);
+var effects = createEpicMiddleware(getBoards$), // multiple ? createEpicMiddleware(ReduxObservable.combineEpics(getBoards$, getBoards$))
     store   = createStore(boardsReducer, applyMiddleware(effects)),
     element = document.getElementById('app');
 
@@ -86,7 +86,7 @@ store.subscribe( () => {
     /*------- View Rendering ---------------------------------------------*/
     data.pending ? element.innerHTML = '<h1>Loading</h1>' : [
         element.innerHTML = '',
-        data.boards.map(v => {
+        data.boards.reduce((elem, v) => {
             let childrenElement = document.createElement('div');
             childrenElement.className = 'item'
             childrenElement.innerHTML = `
@@ -95,8 +95,11 @@ store.subscribe( () => {
                 <h4>${ v.writer }</h4>
                 <h4>${ v.content}</h4>
             `;
-            element.appendChild(childrenElement);
-        })
+
+            elem.appendChild(childrenElement);
+            
+            return elem;
+        }, element)
     ];
     /*--------------------------------------------------------------------*/
 

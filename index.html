@@ -30,10 +30,10 @@
 
 
             /*------- Actions ---------------------------------------------*/
-            var GET_BOARDS         = '[Boards] GetBoards';
+            var GET_BOARDS         = '[Boards] GetBoards',
                 GET_BOARDS_SUCCESS = '[Boards] GetBoardsSuccess';
 
-            var GetBoards        = () => ({ type : GET_BOARDS });
+            var GetBoards        = () => ({ type : GET_BOARDS }),
                 GetBoardsSuccess = (boards) => {
                     console.log('GetBoardsSuccess', boards);
                     return ({ type : GET_BOARDS_SUCCESS, ...boards })
@@ -80,7 +80,7 @@
 
 
             /*------- App ---------------------------------------------*/
-            var effects = createEpicMiddleware(getBoards$);
+            var effects = createEpicMiddleware(getBoards$), // multiple ? createEpicMiddleware(ReduxObservable.combineEpics(getBoards$, getBoards$))
                 store   = createStore(boardsReducer, applyMiddleware(effects)),
                 element = document.getElementById('app');
             
@@ -91,7 +91,7 @@
                 /*------- View Rendering ---------------------------------------------*/
                 data.pending ? element.innerHTML = '<h1>Loading</h1>' : [
                     element.innerHTML = '',
-                    data.boards.map(v => {
+                    data.boards.reduce((elem, v) => {
                         let childrenElement = document.createElement('div');
                         childrenElement.className = 'item'
                         childrenElement.innerHTML = `
@@ -100,8 +100,11 @@
                             <h4>${ v.writer }</h4>
                             <h4>${ v.content}</h4>
                         `;
-                        element.appendChild(childrenElement);
-                    })
+                        
+                        elem.appendChild(childrenElement);
+                        
+                        return elem;
+                    }, element)
                 ];
                 /*--------------------------------------------------------------------*/
 
