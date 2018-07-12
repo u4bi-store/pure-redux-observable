@@ -4,9 +4,9 @@
         <meta charset="utf-8">
         <title>pure redux-observable</title>
 
-        <script src="https://unpkg.com/redux@^3.5.2/dist/redux.min.js"></script>
-        <script src="https://unpkg.com/@reactivex/rxjs@5.0.0-beta.12/dist/global/Rx.js"></script>
-        <script src="https://unpkg.com/redux-observable/dist/redux-observable.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.0/redux.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.2.1/rxjs.umd.min.js"></script>
+        <script src="https://unpkg.com/redux-observable@latest/dist/redux-observable.min.js"></script>
         <style>
             .item { border: .1px solid #666; }
             h4 { margin: 0}
@@ -40,23 +40,16 @@
                 };
 
 
-            /*------- Effects ---------------------------------------------*/
-            var getBoards$ = (epic) => epic.ofType(GET_BOARDS)
-                                            .delay(1000)
-                                            .switchMap((action) => {
-                                                return Rx.Observable.ajax({
-                                                    url : 'https://cdn.rawgit.com/u4bi/pure-redux-observable/master/model/data.json',
-                                                    method : 'GET',
-                                                    crossDomain : true
-                                                }).map(e => {
-                                                    console.log('Ajax then', e.response);
-                                                    return e.response
-                                                }).catch(err => console.error(err));
-                                            })
-                                            .map(v => {
-                                                console.log('Effects then', v);
-                                                return GetBoardsSuccess(v)
-                                            });
+            /*------- epic ---------------------------------------------*/
+            var getBoards = (action$) => action$.pipe(
+                    ReduxObservable.ofType(GET_BOARDS),
+                    rxjs.operators.delay(1000),
+                    rxjs.operators.mergeMap(action => rxjs.ajax.ajax.getJSON('https://cdn.rawgit.com/u4bi/pure-redux-observable/master/model/data.json')),
+                    rxjs.operators.map(v => {
+                        console.log('epic then', v);
+                        return GetBoardsSuccess(v)
+                    })
+                );
 
 
             /*------- Reducer ---------------------------------------------*/
@@ -80,8 +73,8 @@
 
 
             /*------- App ---------------------------------------------*/
-            var effects = createEpicMiddleware(getBoards$), // multiple ? createEpicMiddleware(ReduxObservable.combineEpics(getBoards$, getBoards$))
-                store   = createStore(boardsReducer, applyMiddleware(effects)),
+            var epic = createEpicMiddleware(),
+                store   = createStore(boardsReducer, applyMiddleware(epic)),
                 element = document.getElementById('app');
             
             store.subscribe( () => {
@@ -110,6 +103,8 @@
 
 
             });
+
+            epic.run(getBoards), // multiple ? createEpicMiddleware(ReduxObservable.combineEpics(getBoards, getBoards)))
 
             store.dispatch(GetBoards());
 

@@ -28,27 +28,20 @@ var GetBoards        = () => ({ type : GET_BOARDS }),
     };
 ```
 
-### Effects
+### Epic
 
 ```javascript
 var API_URL = 'https://cdn.rawgit.com/u4bi/pure-redux-observable/master/model/data.json';
 
-var getBoards$ = (epic) => epic.ofType(GET_BOARDS)
-                                .delay(1000)
-                                .switchMap((action) => {
-                                    return Rx.Observable.ajax({
-                                        url : API_URL,
-                                        method : 'GET',
-                                        crossDomain : true
-                                    }).map(e => {
-                                        console.log('Ajax then', e.response);
-                                        return e.response
-                                    }).catch(err => console.error(err));
-                                })
-                                .map(v => {
-                                    console.log('Effects then', v);
+var getBoards = (action$) => action$.pipe(
+                                ReduxObservable.ofType(GET_BOARDS),
+                                rxjs.operators.delay(1000),
+                                rxjs.operators.mergeMap(action => rxjs.ajax.ajax.getJSON('https://cdn.rawgit.com/u4bi/pure-redux-observable/master/model/data.json')),
+                                rxjs.operators.map(v => {
+                                    console.log('epic then', v);
                                     return GetBoardsSuccess(v)
-                                });
+                                })
+                            );
 ```
 
 ### Reducer
@@ -75,8 +68,8 @@ var boardsReducer = (state = initialState, action) => {
 
 ### App
 ```javascript
-var effects = createEpicMiddleware(getBoards$), // multiple ? createEpicMiddleware(ReduxObservable.combineEpics(getBoards$, getBoards$))
-    store   = createStore(boardsReducer, applyMiddleware(effects)),
+var epic = createEpicMiddleware(),
+    store   = createStore(boardsReducer, applyMiddleware(epic)),
     element = document.getElementById('app');
 
 store.subscribe( () => {
@@ -104,6 +97,8 @@ store.subscribe( () => {
     /*--------------------------------------------------------------------*/
 
 });
+
+epic.run(getBoards), // multiple ? ReduxObservable.combineEpics(getBoards, getBoards)
 
 store.dispatch(GetBoards());
 ```
